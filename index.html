@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday My Red Devil 🔴⚽</title>
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* RESET & BASE MANCHESTER UNITED THEME STYLES */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: #0a0002;
+      color: #f5f5f5;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #star-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .app-container {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background: rgba(15, 3, 6, 0.92);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 50px rgba(218, 2, 14, 0.2), 0 0 100px rgba(0, 0, 0, 0.95);
+      border-left: 1px solid rgba(218, 2, 14, 0.3);
+      border-right: 1px solid rgba(218, 2, 14, 0.3);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* PAGES SYSTEM */
+    .page {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 18px 110px 18px;
+      min-height: 100vh;
+      width: 100%;
+      text-align: center;
+      opacity: 0;
+      transform: scale(0.96);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .page.active {
+      display: flex;
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* NAVIGATION BAR */
+    .nav-bar {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 30px);
+      max-width: 440px;
+      background: rgba(20, 4, 7, 0.95);
+      backdrop-filter: blur(25px);
+      border: 1px solid rgba(218, 2, 14, 0.4);
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 100;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 15px rgba(218, 2, 14, 0.2);
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-btn span {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .nav-btn.active, .nav-btn:hover {
+      color: #FFD700;
+      text-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* MUSIC CONTROLLER WIDGET */
+    .music-widget {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      background: rgba(25, 5, 8, 0.9);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      border-radius: 25px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 101;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+
+    .music-info {
+      display: flex;
+      flex-direction: column;
+      text-align: right;
+      max-width: 95px;
+    }
+
+    .music-title {
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: #FFD700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .music-sub {
+      font-size: 0.5rem;
+      color: #a1a1aa;
+    }
+
+    .music-controls-btn {
+      background: none;
+      border: none;
+      color: #ffffff;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .music-controls-btn:hover {
+      color: #DA020E;
+    }
+
+    .play-pause-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #DA020E;
+      color: #ffffff;
+      border: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(218, 2, 14, 0.6);
+      transition: all 0.3s ease;
+    }
+
+    .play-pause-btn.playing {
+      animation: spin 5s linear infinite;
+      background: #FFD700;
+      color: #000000;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+    }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* TYPOGRAPHY & BERGERAK ANIMATED BUTTONS */
+    .title-gradient {
+      background: linear-gradient(135deg, #ffffff 0%, #DA020E 50%, #FFD700 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 900;
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      animation: pulseGlow 2.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: translateY(0); filter: drop-shadow(0 0 2px rgba(218,2,14,0.4)); }
+      100% { transform: translateY(-3px); filter: drop-shadow(0 0 12px rgba(255,215,0,0.8)); }
+    }
+
+    .subtitle-font {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-style: italic;
+      color: #FFD700;
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+      margin-bottom: 5px;
+      animation: floatSubtitle 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatSubtitle {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-4px); }
+    }
+
+    .mu-badge-header {
+      width: 45px;
+      height: 45px;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
+      animation: floatLogo 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatLogo {
+      0% { transform: scale(1) rotate(-2deg); }
+      100% { transform: scale(1.08) rotate(2deg); }
+    }
+
+    .btn-glow {
+      background: linear-gradient(135deg, #DA020E 0%, #8B0000 100%);
+      color: #ffffff;
+      border: 1px solid #FFD700;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(218, 2, 14, 0.4);
+      transition: all 0.3s ease;
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-glow:active {
+      transform: scale(0.96);
+      background: #8B0000;
+    }
+
+    /* HALAMAN 1: LOCKSCREEN & PIN */
+    .lock-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(218, 2, 14, 0.3);
+      padding: 20px 15px;
+      border-radius: 20px;
+      width: 100%;
+      margin-top: 15px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+    }
+
+    .passcode-display {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 15px 0 20px 0;
+    }
+
+    .pass-dot {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      border: 2px solid #FFD700;
+      transition: all 0.3s;
+    }
+
+    .pass-dot.filled {
+      background: #DA020E;
+      border-color: #DA020E;
+      box-shadow: 0 0 12px #DA020E;
+    }
+
+    .pass-dot.error {
+      border-color: #ef4444;
+      background: #ef4444;
+      box-shadow: 0 0 12px #ef4444;
+      animation: shake 0.3s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 230px;
+      margin: 0 auto;
+    }
+
+    .key-btn {
+      background: rgba(218, 2, 14, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      color: #ffffff;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .key-btn:active {
+      background: #DA020E;
+      border-color: #FFD700;
+      transform: scale(0.92);
+    }
+
+    /* HALAMAN 2: KUE STADIUM RED DEVILS */
+    .cake-container {
+      position: relative;
+      margin: 70px 0 25px 0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .candle-group {
+      position: absolute;
+      top: -55px;
+      display: flex;
+      gap: 16px;
+      z-index: 10;
+    }
+
+    .candle-stick {
+      width: 10px;
+      height: 42px;
+      background: repeating-linear-gradient(45deg, #DA020E, #DA020E 5px, #FFD700 5px, #FFD700 10px);
+      border-radius: 4px;
+      position: relative;
+      box-shadow: 0 0 10px rgba(218,2,14,0.4);
+    }
+
+    .flame-glow {
+      width: 14px;
+      height: 22px;
+      background: radial-gradient(circle, #FFD700 20%, #DA020E 60%, rgba(255,215,0,0) 100%);
+      border-radius: 50% 50% 20% 20%;
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 15px #FFD700, 0 0 30px #DA020E;
+      animation: flameWiggle 0.6s infinite alternate ease-in-out;
+      transition: all 0.4s ease;
+    }
+
+    .flame-glow.off {
+      opacity: 0;
+      transform: translateX(-50%) scale(0);
+    }
+
+    @keyframes flameWiggle {
+      0% { transform: translateX(-50%) scale(1) rotate(-3deg); }
+      100% { transform: translateX(-50%) scale(1.1) rotate(3deg); }
+    }
+
+    .cake-tier {
+      position: relative;
+      border-radius: 12px 12px 8px 8px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.9), inset 0 -6px 0 rgba(0,0,0,0.6);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+    }
+
+    .tier-top {
+      width: 100px;
+      height: 40px;
+      background: linear-gradient(180deg, #DA020E, #8B0000);
+      z-index: 3;
+    }
+    .tier-top::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 12px;
+      background: #FFD700;
+      border-radius: 12px 12px 6px 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .tier-middle {
+      width: 145px;
+      height: 48px;
+      background: linear-gradient(180deg, #18181b, #09090b);
+      margin-top: -5px;
+      z-index: 2;
+    }
+    .tier-middle::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 14px;
+      background: #DA020E;
+      border-radius: 8px 8px 6px 6px;
+    }
+
+    .tier-bottom {
+      width: 190px;
+      height: 55px;
+      background: linear-gradient(180deg, #8B0000, #3B0000);
+      margin-top: -5px;
+      z-index: 1;
+    }
+    .tier-bottom::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 16px;
+      background: #FFD700;
+      border-radius: 8px 8px 6px 6px;
+    }
+
+    .pearl-decoration {
+      position: absolute;
+      bottom: 4px;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      padding: 0 6px;
+    }
+
+    .pearl {
+      width: 5px;
+      height: 5px;
+      background: #FFD700;
+      border-radius: 50%;
+      box-shadow: 0 0 5px rgba(255,215,0,0.8);
+    }
+
+    .cake-plate {
+      width: 220px;
+      height: 10px;
+      background: linear-gradient(90deg, #8B0000, #FFD700, #8B0000);
+      border-radius: 50%;
+      margin-top: -4px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+    }
+
+    /* HALAMAN 3: GALERI FOTO */
+    .gallery-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    .photo-card {
+      background: rgba(25, 5, 8, 0.8);
+      border: 1px solid rgba(218, 2, 14, 0.3);
+      padding: 12px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      transition: all 0.3s ease;
+      text-align: left;
+    }
+
+    .photo-card:hover {
+      border-color: #FFD700;
+      transform: translateY(-3px);
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: auto;
+      max-height: 320px;
+      object-fit: contain;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      display: block;
+    }
+
+    .photo-card p {
+      color: #e4e4e7;
+      font-weight: 400;
+      font-size: 0.82rem;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    /* HALAMAN 4: SURAT PERBAIKAN RAPI & TIDAK TERPOTONG */
+    .letter-box {
+      background: rgba(25, 5, 8, 0.85);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      padding: 18px;
+      border-radius: 16px;
+      text-align: left;
+      margin: 15px 0;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    #typing-letter {
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: #f4f4f5;
+      min-height: 140px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* SEKSI FACT CORNER */
+    .facts-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    .fact-card {
+      background: linear-gradient(135deg, rgba(30, 6, 10, 0.95), rgba(15, 3, 6, 0.9));
+      border: 1px solid rgba(218, 2, 14, 0.4);
+      padding: 12px 14px;
+      border-radius: 14px;
+      text-align: left;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .fact-card:hover {
+      border-color: #FFD700;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(218, 2, 14, 0.3);
+    }
+
+    .fact-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .fact-card-header i {
+      color: #FFD700;
+      font-size: 0.9rem;
+    }
+
+    .fact-card-header h4 {
+      font-size: 0.82rem;
+      color: #ffffff;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .fact-card p {
+      font-size: 0.78rem;
+      color: #d4d4d8;
+      line-height: 1.5;
+    }
+
+    .fact-card .fact-romantic {
+      font-size: 0.75rem;
+      color: #FFD700;
+      font-style: italic;
+      margin-top: 6px;
+      border-top: 1px dashed rgba(255, 215, 0, 0.2);
+      padding-top: 6px;
+    }
+
+    .coupon-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    .coupon-card {
+      background: linear-gradient(135deg, rgba(139, 0, 0, 0.6), rgba(20, 4, 7, 0.9));
+      border: 1px dashed #FFD700;
+      padding: 14px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .coupon-card:hover {
+      background: rgba(218, 2, 14, 0.3);
+      border-style: solid;
+    }
+
+    .coupon-card.claimed {
+      opacity: 0.6;
+      border-style: solid;
+      border-color: #FFD700;
+    }
+
+    /* MODAL POPUP UNTUK DETAIL KUPON */
+    .coupon-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .coupon-modal-overlay.active {
+      display: flex;
+    }
+
+    .coupon-modal {
+      background: #140407;
+      border: 2px solid #FFD700;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      box-shadow: 0 0 30px rgba(218, 2, 14, 0.8);
+      position: relative;
+      text-align: center;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .close-modal-btn {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: #FFD700;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .modal-media {
+      width: 100%;
+      border-radius: 12px;
+      margin: 15px 0;
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      max-height: 220px;
+      object-fit: cover;
+    }
+
+    .modal-audio-player {
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+
+    /* FLOATING PARTICLES */
+    .star-particle {
+      position: fixed;
+      font-size: 1.4rem;
+      pointer-events: none;
+      z-index: 999;
+      animation: floatUp 2s ease-out forwards;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-120px) scale(1.5); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BACKGROUND CANVAS BERGERAK -->
+  <canvas id="star-canvas"></canvas>
+
+  <!-- NATIVE HTML5 AUDIO -->
+  <audio id="bg-music" preload="auto"></audio>
+
+  <!-- MUSIC CONTROLLER WIDGET UTAMA -->
+  <div class="music-widget">
+    <button class="music-controls-btn" onclick="prevTrack()" title="Lagu Sebelumnya">
+      <i class="fa-solid fa-backward-step"></i>
+    </button>
+    
+    <button class="play-pause-btn" id="music-toggle" onclick="toggleMusic()">
+      <i class="fa-solid fa-play" id="play-icon"></i>
+    </button>
+    
+    <button class="music-controls-btn" onclick="nextTrack()" title="Lagu Selanjutnya">
+      <i class="fa-solid fa-forward-step"></i>
+    </button>
+
+    <div class="music-info">
+      <span class="music-title" id="track-title">Glory Glory MU</span>
+      <span class="music-sub" id="track-artist">Track 1/3</span>
+    </div>
+  </div>
+
+  <!-- MAIN APP CONTAINER -->
+  <div class="app-container">
+
+    <!-- HALAMAN 1: LOCKSCREEN & PIN RAHASIA -->
+    <section class="page active" id="page-1">
+      <img src="https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg" class="mu-badge-header" alt="MU Logo">
+      <span class="subtitle-font">Theatre of Dreams</span>
+      <h1 class="title-gradient">Masukkan PIN Rahasia 🔐</h1>
+      <p id="pin-hint" style="font-size: 0.8rem; color: #a1a1aa;">Masukkan 4 digit angka rahasia untuk membuka stadion kejutan ini!</p>
+
+      <div class="lock-card">
+        <div class="passcode-display">
+          <div class="pass-dot" id="dot-0"></div>
+          <div class="pass-dot" id="dot-1"></div>
+          <div class="pass-dot" id="dot-2"></div>
+          <div class="pass-dot" id="dot-3"></div>
+        </div>
+
+        <div class="keypad">
+          <button class="key-btn" onclick="pressKey('1')">1</button>
+          <button class="key-btn" onclick="pressKey('2')">2</button>
+          <button class="key-btn" onclick="pressKey('3')">3</button>
+          <button class="key-btn" onclick="pressKey('4')">4</button>
+          <button class="key-btn" onclick="pressKey('5')">5</button>
+          <button class="key-btn" onclick="pressKey('6')">6</button>
+          <button class="key-btn" onclick="pressKey('7')">7</button>
+          <button class="key-btn" onclick="pressKey('8')">8</button>
+          <button class="key-btn" onclick="pressKey('9')">9</button>
+          <button class="key-btn" onclick="clearPass()"><i class="fa-solid fa-trash"></i></button>
+          <button class="key-btn" onclick="pressKey('0')">0</button>
+          <button class="key-btn" onclick="checkPasscode()"><i class="fa-solid fa-unlock"></i></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- HALAMAN 2: KUE 3-TIER MEWAH & TIUP LILIN -->
+    <section class="page" id="page-2">
+      <span class="subtitle-font">Make a Wish, Captain!</span>
+      <h1 class="title-gradient">Happy Birthday, Handsome! 🎂⚽</h1>
+      <p style="font-size: 0.8rem; color: #a1a1aa; margin-bottom: 10px;">Pejamkan mata, buat satu keinginan terbaikmu, lalu **sentuh kuenya** untuk meniup lilin!</p>
+
+      <!-- KUE RED DEVILS -->
+      <div class="cake-container" onclick="blowCandle()">
+        <div class="candle-group">
+          <div class="candle-stick"><div class="flame-glow flame-node"></div></div>
+          <div class="candle-stick"><div class="flame-glow flame-node"></div></div>
+          <div class="candle-stick"><div class="flame-glow flame-node"></div></div>
+        </div>
+
+        <div class="cake-tier tier-top">
+          <div class="pearl-decoration">
+            <div class="pearl"></div><div class="pearl"></div><div class="pearl"></div>
+          </div>
+        </div>
+
+        <div class="cake-tier tier-middle">
+          <div class="pearl-decoration">
+            <div class="pearl"></div><div class="pearl"></div><div class="pearl"></div><div class="pearl"></div>
+          </div>
+        </div>
+
+        <div class="cake-tier tier-bottom">
+          <div class="pearl-decoration">
+            <div class="pearl"></div><div class="pearl"></div><div class="pearl"></div><div class="pearl"></div><div class="pearl"></div>
+          </div>
+        </div>
+
+        <div class="cake-plate"></div>
+      </div>
+
+      <div id="wish-box" style="display: none; margin-top: 15px;">
+        <p style="color: #FFD700; font-weight: 600; font-size: 0.85rem;">✨ Semoga semua impian dan cita-citamu segera terwujud ya, Red Devil! 🔴✨</p>
+        <button class="btn-glow" onclick="goToPage(3)">
+          Lihat Momen Terbaik <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- HALAMAN 3: GALERI FOTO (8 FOTO PROPORSI PAS) -->
+    <section class="page" id="page-3">
+      <span class="subtitle-font">The Hall of Fame</span>
+      <h1 class="title-gradient">Galeri Kenangan 📸</h1>
+      <p style="font-size: 0.8rem; color: #a1a1aa;">Momen-momen hebat yang selalu bikin aku bangga punya kamu.</p>
+
+      <div class="gallery-container">
+        <div class="photo-card">
+          <img src="foto4.jpeg" alt="Foto 1">
+          <p><strong>"Virtual photo with you"</strong><br>foto virtual dulu, foto secara langsungnya masih dalam list.</p>
+        </div>
+
+        <div class="photo-card">
+          <img src="MU.webp" alt="Foto 2">
+          <p><strong>"your favorite logo"</strong><br>yang selalu menjadi sainganku, tapi aku bersyukur karena itu bukan perempuan lain.</p>
+        </div>
+
+        <div class="photo-card">
+          <img src="foto1.jpeg" alt="Foto 3">
+          <p><strong>"my favorite photo"</strong><br>foto ini menjadi favoritku karena gantengnya maksimal banget hehehehe, dan aku suka kalau sayang pakai baju merah dan hitam.</p>
+        </div>
+
+        <div class="photo-card">
+          <img src="foto2.jpeg" alt="Foto 4">
+          <p><strong>"your favorite activity"</strong><br>Aku seneng kalau kamu selalu izin saat ingin bermain bola ataupun berkegiatan apapun itu, dan aku mendukung hobimu.</p>
+        </div>
+
+        <div class="photo-card">
+          <img src="foto3.jpeg" alt="Foto 5">
+          <p><strong>"activities with your friends"</strong><br>disini sayang yang paling menarik dan menggoda soalnya yang lain itu kelihatan tua wkwkwkwk.</p>
+        </div>
+
+        <div class="photo-card">
+          <img src="foto5.jpeg" alt="Foto 6">
+          <p><strong>"first impression"</strong><br>moment ini adalah moment pertama kali kita telponan sampai pagi dan paginya lucuu bangett .</p>
+        </div>
+
+        <div class="photo-card">
+          <img src="foto6.jpeg" alt="Foto 7">
+          <p><strong>"Your Biggest Supporter"</strong><br>Aku bakal selalu ada di garis terdepan buat kasih semangat ke kamu.</p>
+        </div>
+
+        <div class="photo-card">
+          <img src="gambarmu.webp" alt="Foto 8">
+          <p><strong>"Forever & Always"</strong><br>ini bakalan tetap menjadi favorit kamu, dan aku juga harus menjadi tervaforit kamu</p>
+        </div>
+      </div>
+
+      <button class="btn-glow" onclick="goToPage(4)">
+        Baca Surat Spesial <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </section>
+
+    <!-- HALAMAN 4: SURAT PANJANG & PERBAIKAN TEKS TERPOTONG -->
+    <section class="page" id="page-4">
+      <span class="subtitle-font">To My Favorite Legend</span>
+      <h1 class="title-gradient">Surat & Hadiah Spesial ✉️</h1>
+
+      <div class="letter-box">
+        <p id="typing-letter"></p>
+      </div>
+
+      <!-- SEKSI TERBARU: MANCHESTER UNITED FUN FACTS -->
+      <h3 style="font-size: 0.85rem; color: #FFD700; margin-top: 15px; text-align: left; width: 100%; text-transform: uppercase; letter-spacing: 1px;">
+        ⚽ Fact Corner: The Red Devils
+      </h3>
+
+      <div class="facts-grid">
+        <div class="fact-card">
+          <div class="fact-card-header">
+            <i class="fa-solid fa-stadium"></i>
+            <h4>Theatre of Dreams</h4>
+          </div>
+          <p>Old Trafford dijuluki "Teater Impian" oleh legenda Bobby Charlton sebagai tempat lahirnya keajaiban sepak bola hebat.</p>
+          <div class="fact-romantic">"Sama kayak Old Trafford, kamu itu rumah impian terindah buat aku!"</div>
+        </div>
+
+        <div class="fact-card">
+          <div class="fact-card-header">
+            <i class="fa-solid fa-trophy"></i>
+            <h4>Raja Liga Inggris (20 Gelar)</h4>
+          </div>
+          <p>Manchester United adalah pemegang rekor trofi juara Liga Inggris terbanyak sepanjang sejarah yaitu 20 gelar.</p>
+          <div class="fact-romantic">"MU punya 20 trofi, tapi buat aku kamu adalah 1 juara nomor satu selamanya!"</div>
+        </div>
+
+        <div class="fact-card">
+          <div class="fact-card-header">
+            <i class="fa-solid fa-shield-cat"></i>
+            <h4>Semangat Class of '92</h4>
+          </div>
+          <p>Generasi legendaris binaan akademi sendiri yang membuktikan kerja keras dan kekompakan bisa menaklukkan dunia.</p>
+          <div class="fact-romantic">"Semoga kita juga makin kompak dan sukses terus layaknya Class of '92!"</div>
+        </div>
+      </div>
+
+      <!-- KUPON SPESIAL PACAR -->
+      <h3 style="font-size: 0.85rem; color: #FFD700; margin-top: 18px; text-align: left; width: 100%; text-transform: uppercase; letter-spacing: 1px;">
+        🎟️ Kupon Spesial Pacar:
+      </h3>
+
+      <div class="coupon-grid">
+        <!-- KUPON 1: KUCING LUCU -->
+        <div class="coupon-card" onclick="openCouponModal(1)">
+          <div>
+            <h4 style="font-size: 0.8rem; color: #ffffff;" id="coupon-title-1">KUPON #1</h4>
+            <p style="font-size: 0.75rem; color: #a1a1aa;" id="coupon-status-1">Dibelikan Makanan + Temani Cium Kucing Lucu 🐾</p>
+          </div>
+          <i class="fa-solid fa-cat" style="color: #FFD700; font-size: 1.2rem;"></i>
+        </div>
+
+        <!-- KUPON 2: MANCHESTER UNITED -->
+        <div class="coupon-card" onclick="openCouponModal(2)">
+          <div>
+            <h4 style="font-size: 0.8rem; color: #ffffff;" id="coupon-title-2">KUPON #2</h4>
+            <p style="font-size: 0.75rem; color: #a1a1aa;" id="coupon-status-2">Nonton Matchday Manchester United Bareng! 🔴</p>
+          </div>
+          <i class="fa-solid fa-futbol" style="color: #FFD700; font-size: 1.2rem;"></i>
+        </div>
+      </div>
+
+      <button class="btn-glow" onclick="triggerHug(event)" style="margin-top: 20px;">
+        <i class="fa-solid fa-star"></i> Kirim Selebrasi Bintang & Cinta! 🔴
+      </button>
+    </section>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="nav-bar">
+      <button class="nav-btn active" id="nav-1" onclick="goToPage(1)">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Kunci</span>
+      </button>
+      <button class="nav-btn disabled" id="nav-2" onclick="goToPage(2)">
+        <i class="fa-solid fa-cake-candles"></i>
+        <span>Kue</span>
+      </button>
+      <button class="nav-btn disabled" id="nav-3" onclick="goToPage(3)">
+        <i class="fa-solid fa-images"></i>
+        <span>Galeri</span>
+      </button>
+      <button class="nav-btn disabled" id="nav-4" onclick="goToPage(4)">
+        <i class="fa-solid fa-envelope"></i>
+        <span>Surat</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- POPUP MODAL KUPON SPESIAL -->
+  <div class="coupon-modal-overlay" id="couponModal">
+    <div class="coupon-modal">
+      <button class="close-modal-btn" onclick="closeCouponModal()"><i class="fa-solid fa-xmark"></i></button>
+      <h3 id="modalTitle" style="color: #FFD700; font-size: 1rem; text-transform: uppercase;">Judul Kupon</h3>
+      <p id="modalDesc" style="font-size: 0.8rem; color: #d4d4d8; margin-top: 6px;"></p>
+      
+      <!-- GAMBAR/VIDEO MEDIA -->
+      <div id="modalMediaContainer"></div>
+
+      <!-- AUDIO PLAYER KHUSUS KUPON -->
+      <div style="margin-top: 10px; text-align: left;">
+        <span style="font-size: 0.7rem; color: #FFD700;">🎵 Lagu Pengiring Kupon:</span>
+        <audio id="modalAudio" controls class="modal-audio-player"></audio>
+      </div>
+
+      <button class="btn-glow" id="claimBtn" onclick="claimActiveCoupon()" style="width: 100%; justify-content: center; margin-top: 15px;">
+        Klaim Hadiah Ini!
+      </button>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT CODE -->
+  <script>
+    // STATUS UNLOCK
+    let isUnlocked = false;
+
+    // 1. PIN ANGKA RAHASIA
+    const pinRahasia = "3004"; 
+
+    // 2. PLAYLIST LAGU UTAMA
+    const playlist = [
+      {
+        title: "Lagu Favorit 1",
+        artist: "Artis 1",
+        src: "audio.mp4" 
+      },
+      {
+        title: "Glory Glory MU",
+        artist: "Manchester United Anthem",
+        src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" 
+      },
+      {
+        title: "Lagu Romantis",
+        artist: "Favorite Artist",
+        src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" 
+      }
+    ];
+
+    let currentTrackIndex = 0;
+    const music = document.getElementById('bg-music');
+    const musicBtn = document.getElementById('music-toggle');
+    const playIcon = document.getElementById('play-icon');
+    let isPlaying = false;
+
+    function loadTrack(index) {
+      const track = playlist[index];
+      music.src = track.src;
+      document.getElementById('track-title').innerText = track.title;
+      document.getElementById('track-artist').innerText = `${track.artist} (${index + 1}/${playlist.length})`;
+    }
+
+    function playMusic() {
+      music.play().then(() => {
+        isPlaying = true;
+        musicBtn.classList.add('playing');
+        playIcon.classList.remove('fa-play');
+        playIcon.classList.add('fa-pause');
+      }).catch(err => console.log("Autoplay ditahan browser."));
+    }
+
+    function pauseMusic() {
+      music.pause();
+      isPlaying = false;
+      musicBtn.classList.remove('playing');
+      playIcon.classList.remove('fa-pause');
+      playIcon.classList.add('fa-play');
+    }
+
+    function toggleMusic() {
+      if (isPlaying) pauseMusic();
+      else playMusic();
+    }
+
+    function nextTrack() {
+      currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+      loadTrack(currentTrackIndex);
+      if (isPlaying) playMusic();
+    }
+
+    function prevTrack() {
+      currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+      loadTrack(currentTrackIndex);
+      if (isPlaying) playMusic();
+    }
+
+    music.addEventListener('ended', nextTrack);
+    loadTrack(currentTrackIndex);
+
+    // 3. PAGE NAVIGATION (PROTEKSI PIN)
+    function goToPage(num) {
+      if (num !== 1 && !isUnlocked) {
+        document.getElementById('pin-hint').innerText = "🔒 Masukkan PIN rahasia terlebih dahulu!";
+        document.getElementById('pin-hint').style.color = "#ef4444";
+        return;
+      }
+
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+      document.getElementById(`page-${num}`).classList.add('active');
+      document.getElementById(`nav-${num}`).classList.add('active');
+
+      if (num === 4) startTyping();
+    }
+
+    // 4. PASSCODE LOCK SYSTEM
+    let inputPass = "";
+    function pressKey(val) {
+      if (inputPass.length < 4) {
+        inputPass += val;
+        updateDots();
+      }
+      if (inputPass.length === 4) {
+        setTimeout(() => checkPasscode(), 200);
+      }
+    }
+
+    function clearPass() {
+      inputPass = "";
+      updateDots();
+      document.getElementById('pin-hint').innerText = "Masukkan 4 digit angka rahasia untuk membuka stadion kejutan ini!";
+      document.getElementById('pin-hint').style.color = "#a1a1aa";
+    }
+
+    function updateDots() {
+      for (let i = 0; i < 4; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (i < inputPass.length) {
+          dot.classList.add('filled');
+          dot.classList.remove('error');
+        } else {
+          dot.classList.remove('filled');
+          dot.classList.remove('error');
+        }
+      }
+    }
+
+    function checkPasscode() {
+      if (inputPass === pinRahasia) {
+        isUnlocked = true;
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('disabled'));
+        playMusic();
+        goToPage(2);
+      } else {
+        for (let i = 0; i < 4; i++) {
+          document.getElementById(`dot-${i}`).classList.add('error');
+        }
+        document.getElementById('pin-hint').innerText = "❌ PIN Salah, coba lagi ya!";
+        document.getElementById('pin-hint').style.color = "#ef4444";
+        setTimeout(() => clearPass(), 800);
+      }
+    }
+
+    // 5. DATA KUPON SPESIAL
+    const couponsData = {
+      1: {
+        title: "Kupon #1: Dibelikan Makanan & Main Sama Kucing 🐾",
+        desc: "Kupon ini berlaku untuk dibelikan makanan kesukaanmu + bonus waktu main dan cium kucing lucu sepuasnya!",
+        mediaType: "video",
+        mediaUrl: "kucing.mp4",
+        audioUrl: "kucing.mp4"
+      },
+      2: {
+        title: "Kupon #2: Special Matchday Manchester United 🔴",
+        desc: "Kupon khusus nonton matchday MU ditemani cemilan favorit, jersey lengkap, dan bebas tanpa gangguan!",
+        mediaType: "video",
+        mediaUrl: "glory.mp4",
+        audioUrl: "glory.mp4"
+      }
+    };
+
+    let activeCouponId = null;
+
+    function openCouponModal(id) {
+      activeCouponId = id;
+      const data = couponsData[id];
+
+      document.getElementById('modalTitle').innerText = data.title;
+      document.getElementById('modalDesc').innerText = data.desc;
+
+      const mediaContainer = document.getElementById('modalMediaContainer');
+      if (data.mediaType === 'video') {
+        mediaContainer.innerHTML = `<video src="${data.mediaUrl}" controls autoplay loop class="modal-media"></video>`;
+      } else {
+        mediaContainer.innerHTML = `<img src="${data.mediaUrl}" class="modal-media" alt="Coupon Image">`;
+      }
+
+      const modalAudio = document.getElementById('modalAudio');
+      modalAudio.src = data.audioUrl;
+
+      document.getElementById('couponModal').classList.add('active');
+    }
+
+    function closeCouponModal() {
+      document.getElementById('couponModal').classList.remove('active');
+      const modalAudio = document.getElementById('modalAudio');
+      modalAudio.pause();
+      modalAudio.currentTime = 0;
+      
+      const mediaContainer = document.getElementById('modalMediaContainer');
+      mediaContainer.innerHTML = '';
+    }
+
+    function claimActiveCoupon() {
+      if (activeCouponId) {
+        document.getElementById(`coupon-title-${activeCouponId}`).innerText += " (BERHASIL DIKLAIM ✅)";
+        document.getElementById(`coupon-status-${activeCouponId}`).innerText = "Kupon ini sudah kamu aktifkan! Siap-siap dipenuhi permintaannya ❤️";
+        closeCouponModal();
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    // 6. TIUP LILIN KUE
+    let candleBlown = false;
+    function blowCandle() {
+      if (!candleBlown) {
+        document.querySelectorAll('.flame-node').forEach(f => f.classList.add('off'));
+        candleBlown = true;
+        document.getElementById('wish-box').style.display = 'block';
+
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.5 },
+          colors: ['#DA020E', '#FFD700', '#ffffff']
+        });
+      }
+    }
+
+    // 7. EFEK TYPING SURAT (DISELINGI SPASI DAN PENAMBAHAN TEKS LENGKAP)
+    const letterText = "Selamat ulang tahun untuk orang favoritku! 🔴⚽\n\nDi hari yang sangat spesial ini, aku mau mengucapkan terima kasih banyak atas semua hal indah yang sudah kamu berikan. Terima kasih sudah selalu menjadi sosok yang dewasa, sabar, penuh perhatian, dan selalu siap mendukungku dalam situasi apapun.\n\nSemoga di usia yang baru ini, kamu selalu diberikan kesehatan, kelancaran rezeki, serta kesuksesan dalam setiap langkah dan impian yang sedang kamu perjuangkan.\n\nAku akan selalu ada di sini untuk menjadi suporter paling setia buat kamu, persis seperti gemuruh dukungan fans di Theatre of Dreams. Teruslah bersinar dan menjadi kebanggaan! I love you always! ❤️✨";
+
+    let typeIndex = 0;
+    let isTypingStarted = false;
+
+    function startTyping() {
+      if (isTypingStarted) return;
+      isTypingStarted = true;
+      const target = document.getElementById('typing-letter');
+      target.innerText = "";
+      
+      function type() {
+        if (typeIndex < letterText.length) {
+          target.innerText += letterText.charAt(typeIndex);
+          typeIndex++;
+          setTimeout(type, 30);
+        }
+      }
+      type();
+    }
+
+    // 8. EFEK SELEBRASI BINTANG & CINTA (FLOATING PARTICLES)
+    function triggerHug(e) {
+      const symbols = ['🔴', '⚽', '✨', '⭐', '❤️', '🏆'];
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement('div');
+        p.className = 'star-particle';
+        p.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+        p.style.left = (e.clientX + (Math.random() * 120 - 60)) + 'px';
+        p.style.top = (e.clientY + (Math.random() * 60 - 30)) + 'px';
+        document.body.appendChild(p);
+
+        setTimeout(() => p.remove(), 2000);
+      }
+
+      confetti({
+        particleCount: 150,
+        spread: 90,
+        origin: { y: 0.7 },
+        colors: ['#DA020E', '#FFD700', '#ffffff']
+      });
+    }
+
+    // 9. STARFIELD & PARTIKEL RED DEVILS BERGERAK DI BACKGROUND
+    const canvas = document.getElementById('star-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initStars();
+    }
+
+    function initStars() {
+      stars = [];
+      const numStars = Math.floor((canvas.width * canvas.height) / 2500);
+      for (let i = 0; i < numStars; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.8 + 0.5,
+          alpha: Math.random(),
+          speed: Math.random() * 0.03 + 0.005,
+          color: Math.random() > 0.4 ? 'rgba(255, 215, 0,' : 'rgba(218, 2, 14,',
+          vy: Math.random() * -0.5 - 0.2
+        });
+      }
+    }
+
+    function animateStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(star => {
+        star.alpha += star.speed;
+        if (star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
+
+        star.y += star.vy;
+        if (star.y < 0) {
+          star.y = canvas.height;
+          star.x = Math.random() * canvas.width;
+        }
+
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `${star.color} ${Math.abs(star.alpha)})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(animateStars);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animateStars();
+  </script>
+</body>
+</html>
